@@ -1,25 +1,48 @@
-<x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
-        {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mot de passe oublié</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to right, #ffecd2, #fcb69f);
+        }
+
+        .card {
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body class="d-flex align-items-center justify-content-center vh-100">
+    <div class="card shadow-lg p-4" style="max-width: 400px; width: 100%; border-radius: 1rem;">
+        <div class="text-center mb-3">
+            <img src="https://cdn-icons-png.flaticon.com/512/2910/2910768.png" alt="Forgot Password Icon"
+                width="80">
+            <h4 class="mt-2">Mot de passe oublié</h4>
+        </div>
+        <form method="POST" action="{{ route('password.email') }}">
+            @csrf
+            <div class="mb-3">
+                <label class="form-label">Adresse email</label>
+                <input type="email" name="email" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-info w-100">Recevoir un lien</button>
+        </form>
     </div>
+</body>
 
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
-
-    <form method="POST" action="{{ route('password.email') }}">
-        @csrf
-
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Email Password Reset Link') }}
-            </x-primary-button>
-        </div>
-    </form>
-</x-guest-layout>
+</html>

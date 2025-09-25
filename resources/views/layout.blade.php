@@ -8,14 +8,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet">
-
-
-<!-- Bootstrap Selectpicker CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/css/bootstrap-select.min.css">
-<!-- Font Awesome 5 -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
-
     <style>
         body {
             background-color: #f8f9fa;
@@ -48,12 +40,9 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="{{ route('vehicules.index') }}">Gestion des
-                            véhicules</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('missions.index') }}">Gestion des missions</a>
-                    </li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('indexDashboard') }}">Tableau de bord
-                            consommation</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route("vehicules.index") }}">Gestion des véhicules</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route("missions.index") }}">Gestion des missions</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route("indexDashboard") }}">Tableau de bord consommation</a></li>
                     <li class="nav-item"><span class="nav-link">Bonjour, {{ Auth::user()->name ?? 'Invité' }}</span>
                     </li>
                     <li class="nav-item">
@@ -67,7 +56,7 @@
     </nav>
 
 
-    <main class="container py-4">
+    <main class="container-fluid py-4">
         @yield('content')
     </main>
 
@@ -77,11 +66,6 @@
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js"></script>
-
-
-<!-- Bootstrap Selectpicker JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/bootstrap-select.min.js"></script>
-
     @stack('scripts')
 </body>
 
