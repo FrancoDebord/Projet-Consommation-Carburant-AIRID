@@ -75,7 +75,7 @@ class CarburantMissionController extends Controller
         }
 
         ConsoCarburantMission::create($validated);
-        return redirect()->route('carburants.index')->with('success', 'Remise carburant enregistrée avec succès.');
+        return redirect()->route('carburants.index',["mission_id"=>$request->mission_id])->with('success', 'Remise carburant enregistrée avec succès.');
     }
     /**
      * Display the specified resource.
@@ -135,7 +135,7 @@ class CarburantMissionController extends Controller
         }
 
         $carburant_mission->update($validated);
-        return redirect()->route('carburants.index')->with('success', 'Remise carburant mise à jour avec succès.');
+        return redirect()->route('carburants.index',["mission_id"=>$request->mission_id])->with('success', 'Remise carburant mise à jour avec succès.');
     }
 
     /**

@@ -2,6 +2,12 @@
 @section('content')
     <div class="row mt-5">
 
+        @php
+            $mission_id = request("mission_id");
+
+
+            $mission = \App\Models\ConsoMission::find($mission_id);
+        @endphp
 
         <div class="col-md-12">
             <div class="card shadow-sm">
