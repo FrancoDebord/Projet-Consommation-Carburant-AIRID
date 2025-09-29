@@ -191,7 +191,7 @@
                         </label>
                         <select name="chauffeur" id="chauffeur"
                             class="form-control selectpicker  show-tick  @error('chauffeur') is-invalid @enderror"
-                            value="{{ old('chauffeur') }}" data-live-search="true">
+                            value="{{ $chauffeur }}" data-live-search="true">
                             <option value="">Sélectionner </option>
 
                             @forelse ($all_personnels??[] as $personnel)
@@ -223,7 +223,7 @@
                         </label>
                         <select name="chef_mission" id="chef_mission"
                             class="form-control selectpicker  show-tick @error('chef_mission') is-invalid @enderror"
-                            value="{{ old('chef_mission') }}" data-live-search="true">
+                            value="{{ $chef_mission }}" data-live-search="true">
                             <option value="">Sélectionner </option>
 
                             @forelse ($all_personnels??[] as $personnel)
@@ -260,7 +260,7 @@
                             <option value="">selectionner</option>
                             @foreach ($vehicules ?? [] as $vehicule)
                                 <option {{ $vehicule_id == $vehicule->id ? 'selected' : '' }} value="{{ $vehicule->id }}"
-                                    {{ old('vehicule_id') == $vehicule->id ? 'selected' : '' }}>
+                                    {{ $vehicule_id == $vehicule->id ? 'selected' : '' }}>
                                     {{ $vehicule->nom }} - {{ $vehicule->immatriculation }}
                                 </option>
                             @endforeach

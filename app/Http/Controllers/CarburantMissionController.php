@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Conso_Personnels;
 use App\Models\ConsoCarburantMission;
 use App\Models\ConsoMission;
+use App\Models\ConsoVehicule;
 use Illuminate\Http\Request;
 
 class CarburantMissionController extends Controller
@@ -19,11 +20,15 @@ class CarburantMissionController extends Controller
         $mission = ConsoMission::find($request->mission_id);
         $all_carburants_mission = [];
 
+        $all_carburant_courses_semaine = ConsoCarburantMission::where("mission_id", 0)->orderBy("date_remise", "desc")->orderBy("remis_par")->get();
+
         if ($mission) {
             $all_carburants_mission = $mission->carburants;
         }
 
-        return view("missions.index-carburant-remis", compact("mission", "all_carburants_mission"));
+
+
+        return view("missions.index-carburant-remis", compact("mission", "all_carburants_mission", "all_carburant_courses_semaine"));
     }
 
     /**
@@ -36,11 +41,19 @@ class CarburantMissionController extends Controller
             ->get();
 
         $carburant_mission = new ConsoCarburantMission();
+
+        $all_vehicules = ConsoVehicule::orderBy("immatriculation")->get();
+
+        $all_personnels = Conso_Personnels::where("sous_contrat", 1)
+            ->orderBy("prenom")
+            ->get();
         //
         return view('missions.create-remise-carburant-mission', [
             'missions' => ConsoMission::all(),
             'all_personnels' => $all_personnels,
             'carburant_mission' => $carburant_mission,
+            'all_vehicules' => $all_vehicules,
+            'all_personnels' => $all_personnels,
         ]);
     }
 
@@ -56,7 +69,9 @@ class CarburantMissionController extends Controller
             'image_kilometrage_depart' => 'nullable|file|mimes:jpg,jpeg,png,pdf',
             'remis_par' => 'required|string',
             'observation' => 'required|string',
-            'mission_id' => 'required|exists:conso_missions,id',
+            'mission_id' => 'required',
+            'vehicule_id' => 'required',
+            'chauffeur_id' => 'required',
         ]);
 
 
@@ -68,14 +83,46 @@ class CarburantMissionController extends Controller
             $filename = time() . '_' . $file->getClientOriginalName();
 
             // Stocker le fichier dans storage/app/public/carburants
-            $path = $file->storeAs('public/carburants_remis', $filename);
+            // $path = $file->storeAs('public/carburants_remis', $filename);
+            $path = $file->store('carburants_remis', 'public');
 
             // Conserver le chemin relatif pour la BDD
             $validated['image_kilometrage_depart'] = $path;
         }
 
+        $carburant_mission_precedent = ConsoCarburantMission::where("mission_id", $request->mission_id)
+            ->orderBy("full_date_remise", "desc")
+            ->first();
+
+        if ($carburant_mission_precedent) { // S'il y avait un paiement précédent
+
+
+            if ($request->kilometrage_depart < $carburant_mission_precedent->kilometrage_depart) {
+
+                return back()->with('error', 'Ce kilométrage doit être supérieur au kilométrage départ de la demande précédente.')->withInput();
+            }
+            // if ($request->date_remise <= $carburant_mission_precedent->date_remise) {
+
+            //     return back()->with('error', 'La date que vous sélectionnez ici doit être supérieure à la date de la précédente remise de carburant. Si vous tenez à utiliser la même date, vous pouvez aller modifier l\'enregistrement de ce jour-là.')->withInput();
+            // }
+
+            $distance_parcourue = $request->kilometrage_depart - $carburant_mission_precedent->kilometrage_depart;
+
+            $mission_concernee = ConsoMission::find($request->mission_id);
+
+            $quantite_carburant_consommee = ($distance_parcourue * $mission_concernee->conso_moyenne_vehicule) / 100;
+
+            $montant_carburant_depense = ($quantite_carburant_consommee * $mission_concernee->vehicule->typeCarburant->prix_station);
+
+            //Mise à jour de l'ancien carburant remis
+            $carburant_mission_precedent->distance_parcourue = $distance_parcourue;
+            $carburant_mission_precedent->quantite_carburant_consommee = $quantite_carburant_consommee;
+            $carburant_mission_precedent->montant_carburant_depense = $montant_carburant_depense;
+            $carburant_mission_precedent->save();
+        }
+
         ConsoCarburantMission::create($validated);
-        return redirect()->route('carburants.index',["mission_id"=>$request->mission_id])->with('success', 'Remise carburant enregistrée avec succès.');
+        return redirect()->route('carburants.index', ["mission_id" => $request->mission_id])->with('success', 'Remise carburant enregistrée avec succès.');
     }
     /**
      * Display the specified resource.
@@ -90,11 +137,13 @@ class CarburantMissionController extends Controller
      */
     public function edit(string $id)
     {
+
         $all_personnels = Conso_Personnels::where("sous_contrat", 1)
             ->orderBy("prenom")
             ->get();
 
         $carburant_mission =  ConsoCarburantMission::find($id);
+
         //
         return view('missions.create-remise-carburant-mission', [
             'missions' => ConsoMission::all(),
@@ -108,6 +157,7 @@ class CarburantMissionController extends Controller
      */
     public function update(Request $request, string $id)
     {
+
         $validated  = $request->validate([
             'kilometrage_depart' => 'required|numeric',
             'montant_carburant_remis' => 'required|numeric',
@@ -115,11 +165,14 @@ class CarburantMissionController extends Controller
             'image_kilometrage_depart' => 'nullable|file|mimes:jpg,jpeg,png,pdf',
             'remis_par' => 'required|string',
             'observation' => 'required|string',
-            'mission_id' => 'required|exists:conso_missions,id',
+            'mission_id' => 'required',
+            'vehicule_id' => 'required',
+            'chauffeur_id' => 'required',
         ]);
 
 
         $carburant_mission = ConsoCarburantMission::findOrFail($id);
+
         // 2. Gestion de l'upload
         if ($request->hasFile('image_kilometrage_depart')) {
             $file = $request->file('image_kilometrage_depart');
@@ -128,14 +181,53 @@ class CarburantMissionController extends Controller
             $filename = time() . '_' . $file->getClientOriginalName();
 
             // Stocker le fichier dans storage/app/public/carburants
-            $path = $file->storeAs('public/carburants_remis', $filename);
+            // $path = $file->storeAs('public/carburants_remis', $filename);
+            $path = $file->store('carburants_remis', 'public');
 
             // Conserver le chemin relatif pour la BDD
             $validated['image_kilometrage_depart'] = $path;
         }
 
+        $carburant_mission_precedent = ConsoCarburantMission::where("mission_id", $request->mission_id)
+            ->where("date_remise", "<", $carburant_mission->date_remise)
+            ->where("id", "<>", $carburant_mission->id)
+            ->orderBy("date_remise", "desc")
+            ->first();
+
+
+
+        if ($carburant_mission_precedent) { // S'il y avait un paiement précédent
+
+            if ($request->kilometrage_depart < $carburant_mission_precedent->kilometrage_depart) {
+
+                return back()->with('error', 'Ce kilométrage doit être supérieur au kilométrage départ de la demande précédente.')->withInput();
+            }
+
+            // if ($request->date_remise <= $carburant_mission_precedent->date_remise) {
+
+            //     return back()->with('error', 'La date que vous sélectionnez ici doit être supérieure à la date de la précédente remise de carburant. Si vous tenez à utiliser la même date, vous pouvez aller modifier l\'enregistrement de ce jour-là.')->withInput();
+            // }
+
+
+
+            $distance_parcourue = $request->kilometrage_depart - $carburant_mission_precedent->kilometrage_depart;
+
+            $mission_concernee = ConsoMission::find($request->mission_id);
+
+            $quantite_carburant_consommee = ($distance_parcourue * $mission_concernee->conso_moyenne_vehicule) / 100;
+
+            $montant_carburant_depense = ($quantite_carburant_consommee * $mission_concernee->vehicule->typeCarburant->prix_station);
+
+            //Mise à jour de l'ancien carburant remis
+            $carburant_mission_precedent->distance_parcourue = $distance_parcourue;
+            $carburant_mission_precedent->quantite_carburant_consommee = $quantite_carburant_consommee;
+            $carburant_mission_precedent->montant_carburant_depense = $montant_carburant_depense;
+            $carburant_mission_precedent->save();
+        }
+
+
         $carburant_mission->update($validated);
-        return redirect()->route('carburants.index',["mission_id"=>$request->mission_id])->with('success', 'Remise carburant mise à jour avec succès.');
+        return redirect()->route('carburants.index', ["mission_id" => $request->mission_id])->with('success', 'Remise carburant mise à jour avec succès.');
     }
 
     /**

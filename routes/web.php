@@ -5,6 +5,7 @@ use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\MissionController;
 use App\Http\Controllers\PointsFinMissionController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RequeteAjaxController;
 use App\Http\Controllers\TypeCarburantController;
 use App\Http\Controllers\VehiculeController;
 use Illuminate\Support\Facades\Route;
@@ -29,12 +30,6 @@ Route::resource('vehicules', VehiculeController::class)->except(['show','destroy
 Route::resource('missions', MissionController::class)->except(['show','destroy']);
 Route::resource('carburants', CarburantMissionController::class)->except(['show','destroy']);
 
-
-// Carburants (remises carburants pour missions)
-// Route::get('carburants/create', [CarburantMissionController::class, 'create'])->name('carburants.create');
-// Route::post('carburants', [CarburantMissionController::class, 'store'])->name('carburants.store');
-
-
 // Points de fin de mission
 Route::get('pointsfin/create', [PointsFinMissionController::class, 'create'])->name('pointsfin.create');
 Route::post('pointsfin', [PointsFinMissionController::class, 'store'])->name('pointsfin.store');
@@ -44,6 +39,7 @@ Route::post('pointsfin', [PointsFinMissionController::class, 'store'])->name('po
 Route::get('typecarburants/create', [TypeCarburantController::class, 'create'])->name('typecarburants.create');
 Route::post('typecarburants', [TypeCarburantController::class, 'store'])->name('typecarburants.store');
 
+Route::post('/ajax/supprimer-remise-carburant', [RequeteAjaxController::class, 'supprimerRemiseCarburant'])->name('supprimerRemiseCarburant');
 
 
 

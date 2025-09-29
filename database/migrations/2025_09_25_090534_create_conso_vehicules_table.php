@@ -40,6 +40,8 @@ return new class extends Migration
             $table->enum('etat', ['en_cours', 'suspendu', 'termine'])->default('en_cours');
             $table->string('chauffeur')->nullable();
             $table->string('chef_mission')->nullable();
+            $table->decimal('conso_moyenne_vehicule')->nullable();
+            $table->decimal('prix_carburant')->nullable();
             $table->string('projet')->nullable();
             $table->unsignedBigInteger('vehicule_id');
             $table->timestamps();
@@ -49,13 +51,20 @@ return new class extends Migration
         // Table des consommations/carburants mission
         Schema::create('conso_carburants_mission', function (Blueprint $table) {
             $table->id();
-            $table->integer('kilometrage_depart');
+            $table->decimal('kilometrage_depart');
             $table->decimal('montant_carburant_remis', 10, 2);
             $table->date('date_remise');
+            $table->dateTime('full_date_remise');
             $table->string('image_kilometrage_depart')->nullable();
-            $table->string('remis_par');
+            $table->unsignedBigInteger('remis_par');
+            $table->unsignedBigInteger('vehicule_id');
+            $table->unsignedBigInteger('chauffeur_id');
             $table->enum('observation', ['ticket_valeur', 'espece', 'momo'])->default('ticket_valeur');
             $table->unsignedBigInteger('mission_id');
+            $table->decimal('distance_parcourue')->nullable()->comment("Distance parcourue avec ce montant avant une nouvelle demande en KM");
+            $table->decimal('quantite_carburant_consommee')->nullable()->comment("Quantité de carburant consommée en Litres");
+            $table->decimal('montant_carburant_depense')->nullable()->comment("Montant carburant estimé correspondant à cette distance en FCFA");
+            $table->enum('status', ['cloture', 'editable'])->default('editable');
             $table->timestamps();
         });
 

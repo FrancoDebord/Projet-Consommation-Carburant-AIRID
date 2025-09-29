@@ -33,8 +33,25 @@
         </div>
     </div> --}}
 
-    <form method="POST" action="{{ route('carburants.store') }}" enctype="multipart/form-data">
+    @php
+        $route = $carburant_mission->id
+            ? route('carburants.update', $carburant_mission->id)
+            : route('carburants.store');
+
+    @endphp
+
+    @if (session('error'))
+        <div class="d-flex">
+            <p class="alert alert-danger text-center">
+                {{ session('error') }}
+            </p>
+        </div>
+    @endif
+
+    <form method="POST" action="{{ $route }}" enctype="multipart/form-data">
         @csrf
+
+        <input type="hidden" name="_method" value="{{ $carburant_mission->id ? 'PUT' : 'POST' }}">
 
         <div class="card shadow">
             <div class="card-header bg-success text-white">
@@ -52,15 +69,15 @@
                             if (old('kilometrage_depart')) {
                                 $kilometrage_depart = old('kilometrage_depart');
                             } elseif ($carburant_mission) {
-                                $kilometrage_depart = $carburant_mission->kilometrage_depart;
+                                $kilometrage_depart = round($carburant_mission->kilometrage_depart, 2);
                             }
                         @endphp
 
-                            <label for="kilometrage_depart" class="form-label"><strong>Kilométrage départ <span
-                                        class="text-danger">(*)</span></strong></label>
+                        <label for="kilometrage_depart" class="form-label"><strong>Kilométrage départ <span
+                                    class="text-danger">(*)</span></strong></label>
                         <input type="number" id="kilometrage_depart" name="kilometrage_depart"
                             class="form-control @error('kilometrage_depart') is-invalid @enderror"
-                            value="{{ $kilometrage_depart }}" >
+                            value="{{ $kilometrage_depart }}">
                         @error('kilometrage_depart')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -77,13 +94,13 @@
                             if (old('montant_carburant_remis')) {
                                 $montant_carburant_remis = old('montant_carburant_remis');
                             } elseif ($carburant_mission) {
-                                $montant_carburant_remis = $carburant_mission->montant_carburant_remis;
+                                $montant_carburant_remis = round($carburant_mission->montant_carburant_remis, 2);
                             }
                         @endphp
 
                         <input type="number" step="0.01" id="montant_carburant_remis" name="montant_carburant_remis"
                             class="form-control @error('montant_carburant_remis') is-invalid @enderror"
-                            value="{{ $montant_carburant_remis }}" >
+                            value="{{ $montant_carburant_remis }}">
                         @error('montant_carburant_remis')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -104,8 +121,7 @@
                         @endphp
 
                         <input type="date" id="date_remise" name="date_remise"
-                            class="form-control @error('date_remise') is-invalid @enderror" value="{{ $date_remise }}"
-                            >
+                            class="form-control @error('date_remise') is-invalid @enderror" value="{{ $date_remise }}">
                         @error('date_remise')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -114,10 +130,9 @@
                     {{-- Image kilométrage départ --}}
                     <div class="col-12 col-md-4 mb-3 form-group">
                         <label for="image_kilometrage_depart" class="form-label">
-                            <strong> Image du kilométrage <span
-                                    class="text-danger">(*)</span></strong></label>
-                           
-                            </label>
+                            <strong> Image du kilométrage <span class="text-danger">(*)</span></strong></label>
+
+                        </label>
                         @php
                             $image_kilometrage_depart = '';
 
@@ -133,6 +148,13 @@
                         @error('image_kilometrage_depart')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
+
+                        @if ($image_kilometrage_depart)
+                            <div class="">
+                                <a href="{{ asset('storage/' . $image_kilometrage_depart) }}" class="btn-link"
+                                    target="_blank">Voir l'image</a>
+                            </div>
+                        @endif
                     </div>
 
                     {{-- Remis par --}}
@@ -150,7 +172,7 @@
 
                         <label for="remis_par" class="form-label"><strong>Remis par <span
                                     class="text-danger">(*)</span></strong></label>
-                       
+
 
                         <select name="remis_par" id="remis_par"
                             class="form-control selectpicker  show-tick  @error('remis_par') is-invalid @enderror"
@@ -212,11 +234,14 @@
                             }
                         @endphp
 
-                        <label for="mission_id" class="form-label"><strong>Mission <span
+                        <label for="mission_id" class="form-label"><strong>Mission (If Applicable)<span
                                     class="text-danger">(*)</span></strong></label>
                         <select id="mission_id" name="mission_id"
                             class="form-control selectpicker show-tick @error('mission_id') is-invalid @enderror"
                             data-live-search="true">
+                            <option value="">Sélectionner</option>
+                            <option value="0" {{ $mission_id == '' ? 'selected' : '' }}>Course de semaine (dans Cotonou)
+                            </option>
                             @foreach ($missions as $mission)
                                 <option value="{{ $mission->id }}" {{ $mission_id == $mission->id ? 'selected' : '' }}>
                                     {{ $mission->objet }}
@@ -224,6 +249,71 @@
                             @endforeach
                         </select>
                         @error('mission_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    {{-- Vehicule --}}
+                    <div class="col-12 col-md-4 mb-3 form-group">
+                        @php
+                            $vehicule_id = '';
+
+                            if (old('vehicule_id')) {
+                                $vehicule_id = old('vehicule_id');
+                            } elseif ($carburant_mission) {
+                                $vehicule_id = $carburant_mission->vehicule_id;
+                            }
+                        @endphp
+
+                        <label for="vehicule_id" class="form-label"><strong>Sélectionner le véhicule<span
+                                    class="text-danger">(*)</span></strong></label>
+                        <select id="vehicule_id" name="vehicule_id"
+                            class="form-control selectpicker show-tick @error('vehicule_id') is-invalid @enderror"
+                            data-live-search="true">
+                            <option value="">Sélectionner</option>
+                            @foreach ($all_vehicules ?? [] as $vehicule)
+                                <option value="{{ $vehicule->id }}"
+                                    {{ $vehicule_id == $vehicule->id ? 'selected' : '' }}>
+                                    {{ $vehicule->nom }} - {{ $vehicule->immatriculation }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('mission_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+
+                    {{-- Chauffeur --}}
+                    <div class="mb-3 col-12 col-md-4 form-group">
+
+                        @php
+                            $chauffeur_id = '';
+
+                            if (old('chauffeur_id')) {
+                                $chauffeur_id = old('chauffeur_id');
+                            } elseif ($mission) {
+                                $chauffeur_id = $mission->chauffeur;
+                            }
+                        @endphp
+
+                        <label for="chauffeur_id" class="form-label">
+                            <strong>Chauffeur de la mission ou la course <span class="text-danger">(*)</span></strong>
+                        </label>
+                        <select name="chauffeur_id" id="chauffeur_id"
+                            class="form-control selectpicker  show-tick  @error('chauffeur_id') is-invalid @enderror"
+                            value="{{ $chauffeur_id }}" data-live-search="true">
+                            <option value="">Sélectionner </option>
+
+                            @forelse ($all_personnels??[] as $personnel)
+                                <option {{ $chauffeur_id == $personnel->id ? 'selected' : '' }}
+                                    value="{{ $personnel->id }}">
+                                    {{ $personnel->titre . ' ' . $personnel->prenom . ' ' . $personnel->nom }}</option>
+                            @empty
+                            @endforelse
+                        </select>
+
+                        @error('chauffeur')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>

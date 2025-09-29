@@ -56,7 +56,22 @@ class MissionController extends Controller
             'vehicule_id' => 'required',
             'description' => 'nullable',
         ]);
-        ConsoMission::create($request->all());
+
+        $data = $request->all();
+        $consommation_vehicule = null;
+        $prix_carburant = null;
+        $vehicule = ConsoVehicule::find($request->vehicule_id);
+
+        if ($vehicule) {
+
+            $consommation_vehicule = $vehicule->conso_moyenne;
+            $prix_carburant = $vehicule->typeCarburant->prix_station;
+        }
+
+        $data["conso_moyenne_vehicule"] = $consommation_vehicule;
+        $data["prix_carburant"] = $prix_carburant;
+
+        ConsoMission::create($data);
         return redirect()->route('missions.index')->with('success', 'Mission créée');
     }
 
@@ -93,7 +108,7 @@ class MissionController extends Controller
         //
         $consoMission = ConsoMission::findOrFail($mission_id);
 
-           $request->validate([
+        $request->validate([
             'objet' => 'required',
             'date_debut' => 'required',
             'date_fin' => 'required|after_or_equal:date_debut',
@@ -105,7 +120,23 @@ class MissionController extends Controller
             'vehicule_id' => 'required',
             'description' => 'nullable',
         ]);
-        $consoMission->update($request->all());
+
+        $data = $request->all();
+        $consommation_vehicule = null;
+        $prix_carburant = null;
+        $vehicule = ConsoVehicule::find($request->vehicule_id);
+
+        if ($vehicule) {
+
+            $consommation_vehicule = $vehicule->conso_moyenne;
+            $prix_carburant = $vehicule->typeCarburant->prix_station;
+        }
+
+        $data["conso_moyenne_vehicule"] = $consommation_vehicule;
+        $data["prix_carburant"] = $prix_carburant;
+
+
+        $consoMission->update($data);
         return redirect()->route('missions.index')->with('success', 'Mission mise à jour avec succès');
     }
 

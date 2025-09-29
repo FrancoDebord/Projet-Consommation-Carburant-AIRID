@@ -5,6 +5,15 @@
         <a href="{{ route('vehicules.create') }}" class="btn btn-primary">+ Ajouter un véhicule</a>
     </div>
 
+    @if (session('success'))
+        <div class="row">
+            <div class="d-flex">
+                <p class="alert alert-success text-center">
+                    {{ session('success') }}
+                </p>
+            </div>
+        </div>
+    @endif
 
     <table id="vehiculesTable" class="table table-striped">
         <thead>
@@ -16,6 +25,7 @@
                 <th>Type carburant</th>
                 <th>Kilométrage</th>
                 <th>Conso (L/100km)</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
@@ -28,6 +38,12 @@
                     <td>{{ $vehicule->type_carburant }}</td>
                     <td>{{ $vehicule->kilometrage_actuel }}</td>
                     <td>{{ $vehicule->conso_moyenne }}</td>
+                    <td>
+                        <a href="{{ route('vehicules.edit', ['vehicule' => $vehicule]) }}"
+                            class="btn btn-sm btn-outline-warning">
+                            <i class="fa fa-edit">&nbsp;</i>
+                        </a>
+                    </td>
                 </tr>
             @endforeach
         </tbody>

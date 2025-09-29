@@ -8,5 +8,6 @@ class ConsoTypeCarburant extends Model
 {
     //
 
-   protected $guarded = ["created_at","updated_at"];
+    protected $table = "conso_type_carburants";
+    protected $guarded = ["created_at", "updated_at"];
 }

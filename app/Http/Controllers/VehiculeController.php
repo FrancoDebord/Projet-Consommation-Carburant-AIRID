@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ConsoTypeCarburant;
 use App\Models\ConsoVehicule;
 use Illuminate\Http\Request;
 
@@ -12,7 +13,7 @@ class VehiculeController extends Controller
      */
     public function index()
     {
-        return view("vehicules.index-vehicule",['vehicules' => ConsoVehicule::all()]);
+        return view("vehicules.index-vehicule", ['vehicules' => ConsoVehicule::all()]);
     }
 
     /**
@@ -22,7 +23,10 @@ class VehiculeController extends Controller
     {
         //
 
-        return view("vehicules.create-vehicule");
+        $all_types_carburants = ConsoTypeCarburant::all();
+        $vehicule = new ConsoVehicule();
+
+        return view("vehicules.create-vehicule", compact("all_types_carburants", "vehicule"));
     }
 
     /**
@@ -30,15 +34,17 @@ class VehiculeController extends Controller
      */
     public function store(Request $request)
     {
-        
-           $request->validate(
-            ['immatriculation' => 'required|unique:conso_vehicules', 
-            'marque' => 'required', 
-            'conso_moyenne' => 'required|numeric', 
-            'nom' => 'required',
-            'type_carburant' => 'required',
-            'type_moteur' => 'required'
-        ]);
+
+        $request->validate(
+            [
+                'immatriculation' => 'required|unique:conso_vehicules',
+                'marque' => 'required',
+                'conso_moyenne' => 'required|numeric',
+                'nom' => 'required',
+                'type_carburant_id' => 'required',
+                'type_moteur' => 'required'
+            ]
+        );
         ConsoVehicule::create($request->all());
         return redirect()->route('vehicules.index')->with('success', 'Véhicule ajouté');
     }
@@ -54,17 +60,36 @@ class VehiculeController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(ConsoVehicule $consoVehicule)
+    public function edit(int $id)
     {
         //
+
+        $all_types_carburants = ConsoTypeCarburant::all();
+        $vehicule = ConsoVehicule::find($id);
+
+        return view("vehicules.create-vehicule", compact("all_types_carburants", "vehicule"));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, ConsoVehicule $consoVehicule)
+    public function update(Request $request, int $id)
     {
-        //
+
+        $request->validate(
+            [
+                'immatriculation' => 'required|exists:conso_vehicules',
+                'marque' => 'required',
+                'conso_moyenne' => 'required|numeric',
+                'nom' => 'required',
+                'type_carburant_id' => 'required',
+                'type_moteur' => 'required'
+            ]
+        );
+
+        $vehicule = ConsoVehicule::find($id);
+        $vehicule->update($request->all());
+        return redirect()->route('vehicules.index')->with('success', 'Véhicule modifié avec succès');
     }
 
     /**
