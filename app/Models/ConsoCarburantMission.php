@@ -20,4 +20,13 @@ class ConsoCarburantMission extends Model
     {
         return $this->belongsTo(Conso_Personnels::class, 'remis_par');
     }
+    public function chauffeur()
+    {
+        return $this->belongsTo(Conso_Personnels::class, 'chauffeur_id');
+    }
+    public function vehicule()
+    {
+        return $this->belongsTo(ConsoVehicule::class, 'vehicule_id');
+    }
+   
 }

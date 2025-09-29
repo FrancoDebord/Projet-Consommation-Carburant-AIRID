@@ -1,37 +1,6 @@
 @extends('layouts.app')
 @section('content')
-    {{-- <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white">Ajouter une remise carburant</div>
-        <div class="card-body">
-            <form method="POST" action="{{ route('carburants.store') }}" enctype="multipart/form-data"> @csrf
-                <div class="mb-3"><input type="number" name="kilometrage_depart" class="form-control"
-                        placeholder="Kilométrage départ" ></div>
-                <div class="mb-3"><input type="number" step="0.01" name="montant_carburant_remis" class="form-control"
-                        placeholder="Montant remis" ></div>
-                <div class="mb-3"><input type="date" name="date_remise" class="form-control" ></div>
-                <div class="mb-3"><input type="file" name="image_kilometrage_depart" class="form-control"></div>
-                <div class="mb-3"><input type="text" name="remis_par" class="form-control" placeholder="Remis par"
-                        ></div>
-                <div class="mb-3">
-                    <select name="observation" class="form-control">
-                        <option value="ticket_valeur">Ticket-Valeur</option>
-                        <option value="espece">Espèce</option>
-                        <option value="momo">Mobile Money</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <select name="mission_id" class="form-control">
-                        @foreach ($missions as $mission)
-                            <option value="{{ $mission->id }}">{{ $mission->objet }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <button class="btn btn-success">Enregistrer</button>
-            </form>
-
-         
-        </div>
-    </div> --}}
+  
 
     @php
         $route = $carburant_mission->id
@@ -60,6 +29,36 @@
 
             <div class="card-body">
                 <div class="row g-3">
+
+                    {{-- Vehicule --}}
+                    <div class="col-12 col-md-4 mb-3 form-group">
+                        @php
+                            $vehicule_id = '';
+
+                            if (old('vehicule_id')) {
+                                $vehicule_id = old('vehicule_id');
+                            } elseif ($carburant_mission) {
+                                $vehicule_id = $carburant_mission->vehicule_id;
+                            }
+                        @endphp
+
+                        <label for="vehicule_id" class="form-label"><strong>Sélectionner le véhicule<span
+                                    class="text-danger">(*)</span></strong></label>
+                        <select id="vehicule_id" name="vehicule_id"
+                            class="form-control selectpicker show-tick @error('vehicule_id') is-invalid @enderror"
+                            data-live-search="true">
+                            <option value="">Sélectionner</option>
+                            @foreach ($all_vehicules ?? [] as $vehicule)
+                                <option value="{{ $vehicule->id }}" {{ $vehicule_id == $vehicule->id ? 'selected' : '' }}>
+                                    {{ $vehicule->nom }} - {{ $vehicule->immatriculation }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('mission_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
 
                     {{-- Kilométrage départ --}}
                     <div class="col-12 col-md-4 mb-3 form-group">
@@ -120,7 +119,7 @@
                             }
                         @endphp
 
-                        <input type="date" id="date_remise" name="date_remise"
+                        <input type="datetime²" id="date_remise" name="date_remise"
                             class="form-control @error('date_remise') is-invalid @enderror" value="{{ $date_remise }}">
                         @error('date_remise')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -240,7 +239,8 @@
                             class="form-control selectpicker show-tick @error('mission_id') is-invalid @enderror"
                             data-live-search="true">
                             <option value="">Sélectionner</option>
-                            <option value="0" {{ $mission_id == '' ? 'selected' : '' }}>Course de semaine (dans Cotonou)
+                            <option value="0" {{ $mission_id == 0 ? 'selected' : '' }}>Course de semaine (dans
+                                Cotonou)
                             </option>
                             @foreach ($missions as $mission)
                                 <option value="{{ $mission->id }}" {{ $mission_id == $mission->id ? 'selected' : '' }}>
@@ -253,35 +253,7 @@
                         @enderror
                     </div>
 
-                    {{-- Vehicule --}}
-                    <div class="col-12 col-md-4 mb-3 form-group">
-                        @php
-                            $vehicule_id = '';
 
-                            if (old('vehicule_id')) {
-                                $vehicule_id = old('vehicule_id');
-                            } elseif ($carburant_mission) {
-                                $vehicule_id = $carburant_mission->vehicule_id;
-                            }
-                        @endphp
-
-                        <label for="vehicule_id" class="form-label"><strong>Sélectionner le véhicule<span
-                                    class="text-danger">(*)</span></strong></label>
-                        <select id="vehicule_id" name="vehicule_id"
-                            class="form-control selectpicker show-tick @error('vehicule_id') is-invalid @enderror"
-                            data-live-search="true">
-                            <option value="">Sélectionner</option>
-                            @foreach ($all_vehicules ?? [] as $vehicule)
-                                <option value="{{ $vehicule->id }}"
-                                    {{ $vehicule_id == $vehicule->id ? 'selected' : '' }}>
-                                    {{ $vehicule->nom }} - {{ $vehicule->immatriculation }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('mission_id')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
 
 
                     {{-- Chauffeur --}}

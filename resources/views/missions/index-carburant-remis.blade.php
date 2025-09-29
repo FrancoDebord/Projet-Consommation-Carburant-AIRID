@@ -151,11 +151,13 @@
                         <table id="carburantsTable" class="table table-bordered table-striped">
                             <thead>
                                 <tr>
+                                    <th>Véhicule</th>
                                     <th>Date de remise</th>
                                     <th>Montant Remis</th>
                                     <th>Observation</th>
                                     <th>Qui a remis</th>
                                     <th>Kilométrage à la rémise</th>
+                                    <th>Type Mission</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -163,6 +165,7 @@
 
                                 @forelse ($all_carburant_courses_semaine??[] as $carburant)
                                     <tr>
+                                        <td> {{ $carburant->vehicule->nom }} - {{ $carburant->vehicule->immatriculation }}</td>
                                         <td>{{ $carburant->date_remise }}</td>
                                         <td>{{ number_format($carburant->montant_carburant_remis, 0, ' ') }} FCFA</td>
                                         <td>{{ Str::upper($carburant->observation) }}</td>
@@ -171,6 +174,7 @@
                                         @endphp
                                         <td>{{ $qui_a_remis ? $qui_a_remis->titre . ' ' . $qui_a_remis->prenom . ' ' . $qui_a_remis->nom : 'Unknown' }}
                                         <td>{{ round($carburant->kilometrage_depart, 2) }} KM</td>
+                                        <td>Course de la semaine</td>
 
 
 
