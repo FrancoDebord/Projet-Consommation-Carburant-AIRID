@@ -13,6 +13,16 @@
                     </div>
                 </div>
             @endif
+
+            @if (session("error"))
+                <div class="row">
+                    <div class="d-flex">
+                        <p class="alert alert-danger text-center">
+                            {{ session("error") }}
+                        </p>
+                    </div>
+                </div>
+            @endif
             @php
                 $route = $mission->id ? route("missions.update",["mission"=>$mission]):route("missions.store");
             @endphp

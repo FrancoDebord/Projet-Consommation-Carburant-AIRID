@@ -42,9 +42,9 @@
                             }
                         @endphp
 
-                        <label for="vehicule_id" class="form-label"><strong>Sélectionner le véhicule<span
+                        <label for="vehicule_id_carburant_mission" class="form-label"><strong>Sélectionner le véhicule<span
                                     class="text-danger">(*)</span></strong></label>
-                        <select id="vehicule_id" name="vehicule_id"
+                        <select id="vehicule_id_carburant_mission" name="vehicule_id"
                             class="form-control selectpicker show-tick @error('vehicule_id') is-invalid @enderror"
                             data-live-search="true">
                             <option value="">Sélectionner</option>
@@ -119,7 +119,7 @@
                             }
                         @endphp
 
-                        <input type="datetime²" id="date_remise" name="date_remise"
+                        <input type="date" id="date_remise" name="date_remise"
                             class="form-control @error('date_remise') is-invalid @enderror" value="{{ $date_remise }}">
                         @error('date_remise')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -143,7 +143,7 @@
                         @endphp
 
                         <input type="file" id="image_kilometrage_depart" name="image_kilometrage_depart"
-                            class="form-control @error('image_kilometrage_depart') is-invalid @enderror">
+                            class="form-control @error('image_kilometrage_depart') is-invalid @enderror" accept="image/*">
                         @error('image_kilometrage_depart')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -233,9 +233,9 @@
                             }
                         @endphp
 
-                        <label for="mission_id" class="form-label"><strong>Mission (If Applicable)<span
+                        <label for="mission_id_carburant_mission" class="form-label"><strong>Mission (If Applicable)<span
                                     class="text-danger">(*)</span></strong></label>
-                        <select id="mission_id" name="mission_id"
+                        <select id="mission_id_carburant_mission" name="mission_id"
                             class="form-control selectpicker show-tick @error('mission_id') is-invalid @enderror"
                             data-live-search="true">
                             <option value="">Sélectionner</option>
@@ -264,8 +264,8 @@
 
                             if (old('chauffeur_id')) {
                                 $chauffeur_id = old('chauffeur_id');
-                            } elseif ($mission) {
-                                $chauffeur_id = $mission->chauffeur;
+                            } elseif ($carburant_mission) {
+                                $chauffeur_id = $carburant_mission->chauffeur_id;
                             }
                         @endphp
 

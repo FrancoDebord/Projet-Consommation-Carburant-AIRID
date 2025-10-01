@@ -51,7 +51,7 @@ class CarburantMissionController extends Controller
             ->get();
         //
         return view('missions.create-remise-carburant-mission', [
-            'missions' => ConsoMission::all(),
+            'missions' => ConsoMission::where("etat", "en_cours")->get(),
             'all_personnels' => $all_personnels,
             'carburant_mission' => $carburant_mission,
             'all_vehicules' => $all_vehicules,
@@ -92,32 +92,44 @@ class CarburantMissionController extends Controller
             $validated['image_kilometrage_depart'] = $path;
         }
 
+
+        $last_mission = ConsoMission::where("etat", "en_cours")
+            ->where("vehicule_id", $request->vehicule_id)
+            ->orderBy("date_debut", "desc")
+            ->first();
+
+
+        if ($last_mission && $request->mission_id != $last_mission->id) {
+
+            return back()->with('error', 'Ce véhicule a une mission en cours non terminée. Veuillez sélectionner la bonne mission.')->withInput();
+        }
+
         $carburant_mission_precedent = ConsoCarburantMission::where("mission_id", $request->mission_id)
             ->where("vehicule_id", $request->vehicule_id)
-            ->orderBy("full_date_remise", "desc")
+            ->orderBy("date_remise", "desc")
             ->first();
 
 
         $vehicule = ConsoVehicule::find($request->vehicule_id);
 
-        if ($carburant_mission_precedent) { // S'il y avait un paiement précédent
+        $montant_restant = 0;
 
+
+        if ($carburant_mission_precedent) { // S'il y avait un paiement précédent
 
             if ($request->kilometrage_depart < $carburant_mission_precedent->kilometrage_depart) {
 
                 return back()->with('error', 'Ce kilométrage doit être supérieur au kilométrage départ de la demande précédente.')->withInput();
             }
-            // if ($request->date_remise <= $carburant_mission_precedent->date_remise) {
 
-            //     return back()->with('error', 'La date que vous sélectionnez ici doit être supérieure à la date de la précédente remise de carburant. Si vous tenez à utiliser la même date, vous pouvez aller modifier l\'enregistrement de ce jour-là.')->withInput();
-            // }
+
 
             $distance_parcourue = $request->kilometrage_depart - $carburant_mission_precedent->kilometrage_depart;
 
             $mission_concernee = ConsoMission::find($request->mission_id);
 
-            $quantite_carburant_consommee = [];
-            $montant_carburant_depense = [];
+            $quantite_carburant_consommee = 0;
+            $montant_carburant_depense = 0;
 
             if ($mission_concernee) { //Si c'est une mission, on prend la consommation du véhicule affectée à la mission
 
@@ -131,6 +143,9 @@ class CarburantMissionController extends Controller
 
             //calcul du montant restant pour le carburant précédent
             $montant_restant = $carburant_mission_precedent->montant_restant - $montant_carburant_depense; // Le restant est égal au restant qui était là moins le montant dépensé maintenant
+
+            //Si le montant est négatif, on garde 0
+            $montant_restant = $montant_restant < 0 ? 0 : $montant_restant;
 
             //Mise à jour de l'ancien carburant remis
             $carburant_mission_precedent->distance_parcourue = $distance_parcourue;
@@ -172,7 +187,7 @@ class CarburantMissionController extends Controller
 
         //
         return view('missions.create-remise-carburant-mission', [
-            'missions' => ConsoMission::all(),
+            'missions' => ConsoMission::where("etat", "en_cours")->get(),
             'all_personnels' => $all_personnels,
             'carburant_mission' => $carburant_mission,
             'all_vehicules' => $all_vehicules,
@@ -198,6 +213,8 @@ class CarburantMissionController extends Controller
             'chauffeur_id' => 'required',
         ]);
 
+        $montant_restant = 0;
+
 
         $carburant_mission = ConsoCarburantMission::findOrFail($id);
 
@@ -216,8 +233,20 @@ class CarburantMissionController extends Controller
             $validated['image_kilometrage_depart'] = $path;
         }
 
+        $last_mission = ConsoMission::where("etat", "en_cours")
+            ->where("vehicule_id", $request->vehicule_id)
+            ->orderBy("date_debut", "desc")
+            ->first();
+
+        if ($last_mission && $request->mission_id != $last_mission->id) {
+
+            return back()->with('error', 'Ce véhicule a une mission en cours non terminée. Veuillez sélectionner la bonne mission.')->withInput();
+        }
+
+
+
         $carburant_mission_precedent = ConsoCarburantMission::where("mission_id", $request->mission_id)
-            ->where("date_remise", "<", $carburant_mission->date_remise)
+            ->where("date_remise", "<=", $carburant_mission->date_remise)
             ->where("id", "<>", $carburant_mission->id)
             ->where("vehicule_id", $request->vehicule_id)
             ->orderBy("date_remise", "desc")
@@ -233,19 +262,13 @@ class CarburantMissionController extends Controller
                 return back()->with('error', 'Ce kilométrage doit être supérieur au kilométrage départ de la demande précédente.')->withInput();
             }
 
-            // if ($request->date_remise <= $carburant_mission_precedent->date_remise) {
-
-            //     return back()->with('error', 'La date que vous sélectionnez ici doit être supérieure à la date de la précédente remise de carburant. Si vous tenez à utiliser la même date, vous pouvez aller modifier l\'enregistrement de ce jour-là.')->withInput();
-            // }
-
-
 
             $distance_parcourue = $request->kilometrage_depart - $carburant_mission_precedent->kilometrage_depart;
 
             $mission_concernee = ConsoMission::find($request->mission_id);
 
-            $quantite_carburant_consommee = [];
-            $montant_carburant_depense = [];
+            $quantite_carburant_consommee = 0;
+            $montant_carburant_depense = 0;
 
             if ($mission_concernee) { //Si c'est une mission, on prend la consommation du véhicule affectée à la mission
 
@@ -260,6 +283,10 @@ class CarburantMissionController extends Controller
             //calcul du montant restant pour le carburant précédent
             $montant_restant = $carburant_mission_precedent->montant_restant - $montant_carburant_depense; // Le restant est égal au restant qui était là moins le montant dépensé maintenant
 
+            //Si le montant est négatif, on garde 0
+            $montant_restant = $montant_restant < 0;
+            0;
+            $montant_restant;
 
             //Mise à jour de l'ancien carburant remis
             $carburant_mission_precedent->montant_restant = $montant_restant;

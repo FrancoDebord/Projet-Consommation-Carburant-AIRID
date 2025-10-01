@@ -34,6 +34,14 @@
             </div>
         @endif
 
+        @if (session('error'))
+            <div class="d-flex">
+                <p class="alert alert-success text-center">
+                    {{ session('success') }}
+                </p>
+            </div>
+        @endif
+
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h3>Liste des missions</h3>
             <a href="{{ route('missions.create') }}" class="btn btn-primary">+ Programmer une mission</a>
@@ -41,14 +49,13 @@
         <div class="col-md-12">
             <div class="card shadow-sm">
                 <div class="card-header bg-info text-white">Liste des missions récentes</div>
-                <div class="card-body">
+                <div class="card-body table-responsive">
                     <table id="missionsTable" class="table table-bordered table-striped">
                         <thead>
                             <tr>
                                 <th>Objet Mission</th>
                                 <th>Date début</th>
                                 <th>Date fin</th>
-                                <th>Durée</th>
                                 <th>Lieu</th>
                                 <th>Véhicule</th>
                                 <th>Chef Mission</th>
@@ -64,7 +71,7 @@
                                     <td>{{ $mission->objet }}</td>
                                     <td>{{ $mission->date_debut }}</td>
                                     <td>{{ $mission->date_fin }}</td>
-                                    <td>{{ "??" }}</td>
+
                                     <td>{{ $mission->lieu }}</td>
 
                                     @php
@@ -79,19 +86,41 @@
                                     <td>{{ $chauffeurMission ? $chauffeurMission->titre . ' ' . $chauffeurMission->prenom . ' ' . $chauffeurMission->nom : 'Unknown' }}
                                     </td>
 
-                                    <td>
+                                    <td class="">
+
+                                        <a href="{{ route('carburants.index', ['mission_id' => $mission->id]) }}"
+                                            class="btn btn-sm btn-outline-info">
+                                            <i class="fas fa-gas-pump">&nbsp;</i> 
+                                        </a>
                                         <a href="{{ route('missions.edit', ['mission' => $mission]) }}"
                                             class="btn btn-sm btn-outline-warning">
                                             <i class="fa fa-edit">&nbsp;</i>
                                         </a>
-                                        <a href="{{ route("carburants.index",["mission_id"=>$mission->id]) }}" class="btn btn-sm btn-outline-info">
-                                            <i class="fa fa-money">&nbsp;</i>  Carburants
-                                        </a>
+                                        @if ($mission->carburants->count() > 0)
+                                            <a href="#"
+                                                class=" btn btn-sm btn-danger supprimer-mission mt-2"
+                                                data-mission-id="{{ $mission->id }}">
+                                                <i class="fa fa-trash">&nbsp;</i>
+                                            </a>
+                                        @endif
+
+
+
                                     </td>
                                     <td>
-                                         <a href="#" class="btn btn-sm btn-outline-success">
-                                            <i class="fa fa-money">&nbsp;</i> Marquer fin de mission
-                                        </a>
+                                        @if ($mission->etat == 'en_cours')
+                                            <a href="#"
+                                                class="btn btn-sm btn-outline-success -mb-pxx marquer-mission-terminee"
+                                                data-mission-id="{{ $mission->id }}">
+                                                Marquer fin de mission
+                                            </a>
+                                        @else
+                                            <a href="#"
+                                                class="btn btn-sm btn-outline-danger -mb-pxx restaurer-mission"
+                                                data-mission-id="{{ $mission->id }}">
+                                                Restaurer mission
+                                            </a>
+                                        @endif
                                     </td>
                                 </tr>
                             @empty

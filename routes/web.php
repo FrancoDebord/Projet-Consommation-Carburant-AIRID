@@ -21,6 +21,7 @@ Route::get('/', [FrontendController::class,"indexPage"])->name("indexPage");
 // Route::get('/missions/carburant-mission', [FrontendController::class,"remiseCarburantMissionPage"])->name("remiseCarburantMissionPage");
 // Route::get('/missions/fin-mission', [FrontendController::class,"enregistrerFinMissionPage"])->name("enregistrerFinMissionPage");
 Route::get('/dashboard-index', [FrontendController::class,"indexDashboard"])->name("indexDashboard");
+Route::get('/dashboard-carburant', [FrontendController::class,"DashboardCarburant"])->name("DashboardCarburant");
 
 // Véhicules
 Route::resource('vehicules', VehiculeController::class)->except(['show','destroy']);
@@ -40,8 +41,10 @@ Route::get('typecarburants/create', [TypeCarburantController::class, 'create'])-
 Route::post('typecarburants', [TypeCarburantController::class, 'store'])->name('typecarburants.store');
 
 Route::post('/ajax/supprimer-remise-carburant', [RequeteAjaxController::class, 'supprimerRemiseCarburant'])->name('supprimerRemiseCarburant');
+Route::get('/ajax/get-last-mission-vehicule', [RequeteAjaxController::class, 'getLastMissionVehicule'])->name('getLastMissionVehicule');
 
-
-
+Route::post("/ajax/marquer-mission-terminee",[RequeteAjaxController::class,"terminerMission"])->name("terminerMission");
+Route::post("/ajax/restaurer-mission",[RequeteAjaxController::class,"restaurerMission"])->name("restaurerMission");
+Route::post("/ajax/supprimer-mission",[RequeteAjaxController::class,"supprimerMission"])->name("supprimerMission");
 
 require __DIR__.'/auth.php';

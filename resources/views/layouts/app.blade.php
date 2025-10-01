@@ -62,6 +62,8 @@
                     </li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('indexDashboard') }}">Tableau de bord
                             consommation</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('DashboardCarburant') }}">Tableau de bord
+                            carburant</a></li>
                     <li class="nav-item"><span class="nav-link">Bonjour, {{ Auth::user()->name ?? 'Invité' }}</span>
                     </li>
                     <li class="nav-item">

@@ -68,6 +68,15 @@ class MissionController extends Controller
             $prix_carburant = $vehicule->typeCarburant->prix_station;
         }
 
+        //controler s'il y a une mission en cours pour le véhicule sélectionné
+        $mission_en_cours = ConsoMission::where("etat", "en_cours")
+            ->where("vehicule_id", $request->vehicule_id)
+            ->first();
+
+        if ($mission_en_cours) {
+            return redirect()->back()->withInput()->with('error', "Il y a déjà une mission en cours pour le véhicule sélectionné. Veuillez d'abord terminer cette mission avant d'en créer une nouvelle ou changer de véhicule.");
+        }
+
         $data["conso_moyenne_vehicule"] = $consommation_vehicule;
         $data["prix_carburant"] = $prix_carburant;
 
@@ -135,6 +144,16 @@ class MissionController extends Controller
         $data["conso_moyenne_vehicule"] = $consommation_vehicule;
         $data["prix_carburant"] = $prix_carburant;
 
+
+        //controler s'il y a une mission en cours pour le véhicule sélectionné
+        $mission_en_cours = ConsoMission::where("etat", "en_cours")
+            ->where("vehicule_id", $request->vehicule_id)
+            ->where("id", "<>", $consoMission->id)
+            ->first();
+
+        if ($mission_en_cours) {
+            return redirect()->back()->withInput()->with('error', "Il y a déjà une mission en cours pour le véhicule sélectionné. Veuillez d'abord terminer cette mission avant d'en créer une nouvelle ou changer de véhicule.");
+        }
 
         $consoMission->update($data);
         return redirect()->route('missions.index')->with('success', 'Mission mise à jour avec succès');
